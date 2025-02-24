@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "gl-matrix": "^3.4.3",
+    "jquery": "^3.7.1"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.5.32",
+    "browserify": "^17.0.1",
+    "gulp": "^5.0.0",
+    "gulp-typescript": "^6.0.0-alpha.1",
+    "vinyl-source-stream": "^2.0.0"
+  }
+}
