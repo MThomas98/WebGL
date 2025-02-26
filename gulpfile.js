@@ -48,7 +48,7 @@ function buildCube(cb)
     {
         basedir: ".",
         debug: true,
-        entries: ["src/out/translations.js"]
+        entries: ["src/out/cube.js"]
     })
         .bundle()
         .pipe(source("bundle.js"))
@@ -62,4 +62,4 @@ exports.default = buildCube;
 exports.rectangles = buildRectangles;
 exports.cube = buildCube;
 
-exports.clean = cleanOutput;
+// exports.clean = cleanOutput;
