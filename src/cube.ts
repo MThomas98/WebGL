@@ -74,12 +74,12 @@ const COLORS =
     0, 0, 1.0,
     0, 0, 1.0,
 
-    0.5, 0.5, 0.5,
-    0.5, 0.5, 0.5,
-    0.5, 0.5, 0.5,
-    0.5, 0.5, 0.5,
-    0.5, 0.5, 0.5,
-    0.5, 0.5, 0.5,
+    0.0, 1.0, 1.0,
+    0.0, 1.0, 1.0,
+    0.0, 1.0, 1.0,
+    0.0, 1.0, 1.0,
+    0.0, 1.0, 1.0,
+    0.0, 1.0, 1.0,
 
     1, 1, 1,
     1, 1, 1,
@@ -88,12 +88,12 @@ const COLORS =
     1, 1, 1,
     1, 1, 1,
 
-    1.0, 1.0, 0,
-    1.0, 1.0, 0,
-    1.0, 1.0, 0,
-    1.0, 1.0, 0,
-    1.0, 1.0, 0,
-    1.0, 1.0, 0,
+    1.0, 0, 1.0, 
+    1.0, 0, 1.0, 
+    1.0, 0, 1.0, 
+    1.0, 0, 1.0, 
+    1.0, 0, 1.0, 
+    1.0, 0, 1.0, 
 ]
 
 
@@ -183,17 +183,18 @@ function drawCube(
     gl: WebGLRenderingContext, 
     programInfo: ICubeProgramInformation,
     buffers: IBuffers,
-    position: vec2, 
+    position: vec3, 
     rotation: vec3,
     scale: vec3)
 {
     const projectionMatrix = mat4.create();
-    mat4.ortho(projectionMatrix, 0, gl.canvas.width, gl.canvas.height, 0, 0.1, 10000);
+    // mat4.ortho(projectionMatrix, 0, gl.canvas.width, gl.canvas.height, 0, 0.1, 10000);
+    mat4.perspective(projectionMatrix, 45 * (Math.PI / 180), gl.canvas.width / gl.canvas.height, 0.1, 100000);
     gl.uniformMatrix4fv(programInfo.uniformLocation.projection, false, projectionMatrix);
 
     const translationMatrix = mat4.create();
-    mat4.translate(translationMatrix, translationMatrix, [position[0], position[1], -1000.0]);
-    mat4.scale(translationMatrix, translationMatrix, [scale[0], scale[1], scale[2]]);
+    mat4.translate(translationMatrix, translationMatrix, position);
+    mat4.scale(translationMatrix, translationMatrix, scale);
     mat4.rotateX(translationMatrix, translationMatrix, rotation[0]);
     mat4.rotateY(translationMatrix, translationMatrix, rotation[1]);
     mat4.rotateZ(translationMatrix, translationMatrix, rotation[2]);
@@ -207,6 +208,31 @@ function drawCube(
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, VERTICIES.length / 3);
+}
+
+function drawLoop(gl: WebGLRenderingContext, programInfo: ICubeProgramInformation, buffers: IBuffers)
+{
+    const rotationSpeed = 0.001;
+    var rotationY = 0;
+
+    var lastTime = Date.now();
+    function draw()
+    {
+        var deltaTime = Date.now() - lastTime;
+        lastTime = Date.now();
+
+        drawCube(
+            gl, programInfo, buffers,
+            [0, 0, -1000], 
+            [0, rotationY, Math.PI / 4],
+            [200, 200, 200]);
+
+        rotationY += rotationSpeed * deltaTime;
+
+        requestAnimationFrame(draw);
+    }
+
+    draw();
 }
 
 async function main()
@@ -240,12 +266,7 @@ async function main()
 
     const buffers = setupBuffers(gl, programInfo);
 
-    drawCube(
-        gl, programInfo, buffers,
-        [gl.canvas.width / 2, gl.canvas.height / 2], 
-        [0, Math.PI / 6, Math.PI / 4],
-        [200, 200, 200]);
-
+    drawLoop(gl, programInfo, buffers);
 }
 
 main();
