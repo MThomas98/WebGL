@@ -89,6 +89,7 @@ async function main()
     {
         return;
     }
+    setupGLDrawing(gl);
 
     const vertexShaderSrc = await readFile("shaders/rectangles/vertex.vs");
     if (vertexShaderSrc === null)
