@@ -1,9 +1,9 @@
 const WIDTH: number = 640;
 const HEIGHT: number = 480;
 
-import { vec2, mat4, vec3 } from "gl-matrix";
+import { mat4, vec3, vec4 } from "gl-matrix";
 
-import { readFile, randomFloat } from "./utils";
+import { readFile } from "./utils";
 import { createProgram, createContext } from "./webgl";
 
 const VERTICIES = 
@@ -103,13 +103,39 @@ interface ICubeProgramInformation
     attributeLocation:
     {
         vertex: GLint,
-        color: GLint
+        color: GLint,
     },
     uniformLocation:
     {
         projection: WebGLUniformLocation,
-        translation: WebGLUniformLocation,
+        model: WebGLUniformLocation,
+        view: WebGLUniformLocation,
     },
+}
+
+class Camera
+{
+    constructor(position: vec3, rotation: vec3)
+    {
+        this.position = position;
+        this.rotation = rotation;
+    }
+
+    public getViewMatrix() : mat4 
+    {
+        var view = mat4.create();
+        mat4.translate(view, view, this.position);
+        mat4.invert(view, view);
+
+        mat4.rotateX(view, view, this.rotation[0]);
+        mat4.rotateY(view, view, this.rotation[1]);
+        mat4.rotateZ(view, view, this.rotation[2]);
+
+        return view;
+    }
+    
+    position: vec3 = vec3.create();
+    rotation: vec3 = vec3.create();
 }
 
 interface IBuffers
@@ -130,7 +156,8 @@ function createProgramInformation(gl: WebGLRenderingContext, program: WebGLProgr
         uniformLocation:
         {
             projection: <WebGLUniformLocation> gl.getUniformLocation(program, "uProjection"),
-            translation: <WebGLUniformLocation> gl.getUniformLocation(program, "uTranslation"),
+            model: <WebGLUniformLocation> gl.getUniformLocation(program, "uModel"),
+            view: <WebGLUniformLocation> gl.getUniformLocation(program, "uView"),
         }
     }
 }
@@ -185,7 +212,8 @@ function drawCube(
     buffers: IBuffers,
     position: vec3, 
     rotation: vec3,
-    scale: vec3)
+    scale: vec3,
+    camera: Camera)
 {
     const translationMatrix = mat4.create();
     mat4.translate(translationMatrix, translationMatrix, position);
@@ -193,7 +221,9 @@ function drawCube(
     mat4.rotateX(translationMatrix, translationMatrix, rotation[0]);
     mat4.rotateY(translationMatrix, translationMatrix, rotation[1]);
     mat4.rotateZ(translationMatrix, translationMatrix, rotation[2]);
-    gl.uniformMatrix4fv(programInfo.uniformLocation.translation, false, translationMatrix);
+    gl.uniformMatrix4fv(programInfo.uniformLocation.model, false, translationMatrix);
+
+    gl.uniformMatrix4fv(programInfo.uniformLocation.view, false, camera.getViewMatrix());
 
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.vertex);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(VERTICIES), gl.STATIC_DRAW);
@@ -232,7 +262,8 @@ function drawLoop(gl: WebGLRenderingContext, programInfo: ICubeProgramInformatio
             gl, programInfo, buffers,
             [0, 0, -1000], 
             [0, rotationY, Math.PI / 4],
-            [200, 200, 200]);
+            [200, 200, 200],
+            new Camera([-100, 0, 0], [0, Math.PI / 10, 0]));
 
         rotationY += rotationSpeed * deltaTime;
 
