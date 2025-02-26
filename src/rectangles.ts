@@ -15,7 +15,7 @@ interface IRectangleProgramInfomation
     },
     uniformLocation:
     {
-        model: WebGLUniformLocation,
+        translation: WebGLUniformLocation,
         color: WebGLUniformLocation,
     },
 }
@@ -30,7 +30,7 @@ function createProgramInformation(gl: WebGLRenderingContext, program: WebGLProgr
         },
         uniformLocation:
         {
-            model: <WebGLUniformLocation> gl.getUniformLocation(program, "uModel"),
+            translation: <WebGLUniformLocation> gl.getUniformLocation(program, "uTranslation"),
             color: <WebGLUniformLocation> gl.getUniformLocation(program, "uColor"),
         }
     }
@@ -56,7 +56,13 @@ function setupVertexBuffer(gl: WebGLRenderingContext, programInfo: IRectanglePro
     gl.vertexAttribPointer(programInfo.attributeLocation.vertex, size, type, normalise, stride, offset);
 }
 
-function drawRectangle(gl: WebGLRenderingContext, programInfo: IRectangleProgramInfomation, position: vec2, scale: vec2, color: vec3)
+function drawRectangle(
+    gl: WebGLRenderingContext, 
+    programInfo: IRectangleProgramInfomation, 
+    position: vec2, 
+    rotation: number,
+    scale: vec2, 
+    color: vec3)
 {
     const VERTICIES = 
     [
@@ -69,10 +75,11 @@ function drawRectangle(gl: WebGLRenderingContext, programInfo: IRectangleProgram
          0.5,  0.5
     ];
 
-    const modelMatrix = mat4.create();
-    mat4.translate(modelMatrix, modelMatrix, [position[0], position[1], 0.0]);
-    mat4.scale(modelMatrix, modelMatrix, [scale[0], scale[1], 1.0]);
-    gl.uniformMatrix4fv(programInfo.uniformLocation.model, false, modelMatrix);
+    const translationMatrix = mat4.create();
+    mat4.rotate(translationMatrix, translationMatrix, rotation, [0.0, 0.0, 1.0]);
+    mat4.translate(translationMatrix, translationMatrix, [position[0], position[1], 0.0]);
+    mat4.scale(translationMatrix, translationMatrix, [scale[0], scale[1], 1.0]);
+    gl.uniformMatrix4fv(programInfo.uniformLocation.translation, false, translationMatrix);
 
     gl.uniform3fv(programInfo.uniformLocation.color, color);
 
@@ -118,6 +125,7 @@ async function main()
     {
         drawRectangle(gl, programInfo, 
             [randomFloat(-0.5, 0.5), randomFloat(-0.5, 0.5)], 
+            randomFloat(0, Math.PI),
             [randomFloat(0, 1), randomFloat(0, 1)], 
             [randomFloat(0, 1), randomFloat(0, 1), randomFloat(0, 1)]);
         setTimeout(timeout, WAIT_TIME_MS, gl, programInfo);

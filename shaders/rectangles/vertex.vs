@@ -1,8 +1,8 @@
 attribute vec4 aVertexPosition;
 
-uniform mat4 uModel;
+uniform mat4 uTranslation;
 
 void main()
 {
-    gl_Position = uModel * aVertexPosition;
+    gl_Position = uTranslation * aVertexPosition;
 }
