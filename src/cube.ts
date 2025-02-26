@@ -187,11 +187,6 @@ function drawCube(
     rotation: vec3,
     scale: vec3)
 {
-    const projectionMatrix = mat4.create();
-    // mat4.ortho(projectionMatrix, 0, gl.canvas.width, gl.canvas.height, 0, 0.1, 10000);
-    mat4.perspective(projectionMatrix, 45 * (Math.PI / 180), gl.canvas.width / gl.canvas.height, 0.1, 100000);
-    gl.uniformMatrix4fv(programInfo.uniformLocation.projection, false, projectionMatrix);
-
     const translationMatrix = mat4.create();
     mat4.translate(translationMatrix, translationMatrix, position);
     mat4.scale(translationMatrix, translationMatrix, scale);
@@ -212,15 +207,27 @@ function drawCube(
 
 function drawLoop(gl: WebGLRenderingContext, programInfo: ICubeProgramInformation, buffers: IBuffers)
 {
-    const rotationSpeed = 0.001;
+    const projectionMatrix = mat4.create();
+    // mat4.ortho(projectionMatrix, 0, gl.canvas.width, gl.canvas.height, 0, 0.1, 10000);
+    mat4.perspective(projectionMatrix, 45 * (Math.PI / 180), gl.canvas.width / gl.canvas.height, 0.1, 100000);
+    gl.uniformMatrix4fv(programInfo.uniformLocation.projection, false, projectionMatrix);
+
+    const rotationSpeed = Math.PI / 2; // deg/s
     var rotationY = 0;
+
+    const fpsElement = document.querySelector("#fps-counter");
 
     var lastTime = Date.now();
     function draw()
     {
-        var deltaTime = Date.now() - lastTime;
+        var deltaTime = (Date.now() - lastTime) / 1000; // In seconds
         lastTime = Date.now();
 
+        if (fpsElement !== null)
+        {
+            fpsElement.innerHTML = `FPS: ${Math.round(1000 / deltaTime)}`;
+        }
+        
         drawCube(
             gl, programInfo, buffers,
             [0, 0, -1000], 
