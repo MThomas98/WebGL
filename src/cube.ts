@@ -8,47 +8,47 @@ import { createProgram, createContext } from "./webgl";
 
 const VERTICIES = 
 [
-    -0.5, -0.5, -0.5, // 0.0, 0.0,
-    0.5, -0.5, -0.5,  //1.0, 0.0,
-    0.5,  0.5, -0.5,  //1.0, 1.0,
-    0.5,  0.5, -0.5,  //1.0, 1.0,
-    -0.5,  0.5, -0.5,  //0.0, 1.0,
-    -0.5, -0.5, -0.5,  //0.0, 0.0,
+    -0.5, -0.5, -0.5,  0.0, 0.0,
+    0.5, -0.5, -0.5,  1.0, 0.0,
+    0.5,  0.5, -0.5,  1.0, 1.0,
+    0.5,  0.5, -0.5,  1.0, 1.0,
+    -0.5,  0.5, -0.5,  0.0, 1.0,
+    -0.5, -0.5, -0.5,  0.0, 0.0,
 
-    -0.5, -0.5,  0.5,  //0.0, 0.0,
-    0.5, -0.5,  0.5,  //1.0, 0.0,
-    0.5,  0.5,  0.5,  //1.0, 1.0,
-    0.5,  0.5,  0.5,  //1.0, 1.0,
-    -0.5,  0.5,  0.5,  //0.0, 1.0,
-    -0.5, -0.5,  0.5,  //0.0, 0.0,
+    -0.5, -0.5,  0.5,  0.0, 0.0,
+    0.5, -0.5,  0.5,  1.0, 0.0,
+    0.5,  0.5,  0.5,  1.0, 1.0,
+    0.5,  0.5,  0.5,  1.0, 1.0,
+    -0.5,  0.5,  0.5,  0.0, 1.0,
+    -0.5, -0.5,  0.5,  0.0, 0.0,
 
-    -0.5,  0.5,  0.5,  //1.0, 0.0,
-    -0.5,  0.5, -0.5,  //1.0, 1.0,
-    -0.5, -0.5, -0.5,  //0.0, 1.0,
-    -0.5, -0.5, -0.5,  //0.0, 1.0,
-    -0.5, -0.5,  0.5,  //0.0, 0.0,
-    -0.5,  0.5,  0.5,  //1.0, 0.0,
+    -0.5,  0.5,  0.5,  1.0, 0.0,
+    -0.5,  0.5, -0.5,  1.0, 1.0,
+    -0.5, -0.5, -0.5,  0.0, 1.0,
+    -0.5, -0.5, -0.5,  0.0, 1.0,
+    -0.5, -0.5,  0.5,  0.0, 0.0,
+    -0.5,  0.5,  0.5,  1.0, 0.0,
 
-    0.5,  0.5,  0.5,  //1.0, 0.0,
-    0.5,  0.5, -0.5,  //1.0, 1.0,
-    0.5, -0.5, -0.5,  //0.0, 1.0,
-    0.5, -0.5, -0.5,  //0.0, 1.0,
-    0.5, -0.5,  0.5,  //0.0, 0.0,
-    0.5,  0.5,  0.5,  //1.0, 0.0,
+    0.5,  0.5,  0.5,  1.0, 0.0,
+    0.5,  0.5, -0.5,  1.0, 1.0,
+    0.5, -0.5, -0.5,  0.0, 1.0,
+    0.5, -0.5, -0.5,  0.0, 1.0,
+    0.5, -0.5,  0.5,  0.0, 0.0,
+    0.5,  0.5,  0.5,  1.0, 0.0,
 
-    -0.5, -0.5, -0.5,  //0.0, 1.0,
-    0.5, -0.5, -0.5,  //1.0, 1.0,
-    0.5, -0.5,  0.5,  //1.0, 0.0,
-    0.5, -0.5,  0.5,  //1.0, 0.0,
-    -0.5, -0.5,  0.5,  //0.0, 0.0,
-    -0.5, -0.5, -0.5,  //0.0, 1.0,
+    -0.5, -0.5, -0.5,  0.0, 1.0,
+    0.5, -0.5, -0.5,  1.0, 1.0,
+    0.5, -0.5,  0.5,  1.0, 0.0,
+    0.5, -0.5,  0.5,  1.0, 0.0,
+    -0.5, -0.5,  0.5,  0.0, 0.0,
+    -0.5, -0.5, -0.5,  0.0, 1.0,
 
-    -0.5,  0.5, -0.5,  //0.0, 1.0,
-    0.5,  0.5, -0.5,  //1.0, 1.0,
-    0.5,  0.5,  0.5,  //1.0, 0.0,
-    0.5,  0.5,  0.5,  //1.0, 0.0,
-    -0.5,  0.5,  0.5,  //0.0, 0.0,
-    -0.5,  0.5, -0.5,  //0.0, 1.0
+    -0.5,  0.5, -0.5,  0.0, 1.0,
+    0.5,  0.5, -0.5,  1.0, 1.0,
+    0.5,  0.5,  0.5,  1.0, 0.0,
+    0.5,  0.5,  0.5,  1.0, 0.0,
+    -0.5,  0.5,  0.5,  0.0, 0.0,
+    -0.5,  0.5, -0.5,  0.0, 1.0
 ];
 
 const COLORS = 
@@ -96,23 +96,9 @@ const COLORS =
     1.0, 0, 1.0, 
 ]
 
-const UP: vec3 = [0.0, 1.0, 0.0];
+const FLOAT32_BYTES = 4;
 
-interface ICubeProgramInformation
-{
-    program: WebGLProgram,
-    attributeLocation:
-    {
-        vertex: GLint,
-        color: GLint,
-    },
-    uniformLocation:
-    {
-        projection: WebGLUniformLocation,
-        model: WebGLUniformLocation,
-        view: WebGLUniformLocation,
-    },
-}
+const UP: vec3 = [0.0, 1.0, 0.0];
 
 class Camera
 {
@@ -151,10 +137,28 @@ class Camera
     target: vec3 = vec3.create();
 }
 
+interface ICubeProgramInformation
+{
+    program: WebGLProgram,
+    attributeLocation:
+    {
+        vertex: GLint,
+        color: GLint,
+        texCoord: GLint,
+    },
+    uniformLocation:
+    {
+        projection: WebGLUniformLocation,
+        model: WebGLUniformLocation,
+        view: WebGLUniformLocation,
+    },
+}
+
+// TODO: Integrate in to program informat
 interface IBuffers
 {
     vertex: WebGLBuffer,
-    color: WebGLBuffer
+    color: WebGLBuffer,
 }
 
 function createProgramInformation(gl: WebGLRenderingContext, program: WebGLProgram) : ICubeProgramInformation
@@ -165,6 +169,7 @@ function createProgramInformation(gl: WebGLRenderingContext, program: WebGLProgr
         {
             vertex: gl.getAttribLocation(program, "aVertexPosition"),
             color: gl.getAttribLocation(program, "aColor"),
+            texCoord: gl.getAttribLocation(program, "aTexCoord"),
         },
         uniformLocation:
         {
@@ -192,14 +197,25 @@ function setupBuffers(gl: WebGLRenderingContext, programInfo: ICubeProgramInform
     const vertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
 
+    // Vertex positions
     gl.enableVertexAttribArray(programInfo.attributeLocation.vertex);
     const vertexSize = 3;
     const vertexType = gl.FLOAT;
     const vertexNormalise = false;
-    const vertexStride = 0; // 0 implies: move forward size * sizeof(type) each iteration to get the next position
+    const vertexStride = 5 * FLOAT32_BYTES;
     const vertexOffset = 0;
     gl.vertexAttribPointer(programInfo.attributeLocation.vertex, vertexSize, vertexType, vertexNormalise, vertexStride, vertexOffset);
 
+    // Texture Coords
+    gl.enableVertexAttribArray(programInfo.attributeLocation.texCoord);
+    const texCoordSize = 2;
+    const texCoordType = gl.FLOAT;
+    const texCoordNormalise = false;
+    const texCoordStride = 5 * FLOAT32_BYTES;
+    const texCoordOffset = 3 * FLOAT32_BYTES;
+    gl.vertexAttribPointer(programInfo.attributeLocation.texCoord, texCoordSize, texCoordType, texCoordNormalise, texCoordStride, texCoordOffset);
+
+    
     const colorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
 
@@ -215,8 +231,23 @@ function setupBuffers(gl: WebGLRenderingContext, programInfo: ICubeProgramInform
 
     return {
         vertex: vertexBuffer,
-        color: colorBuffer
+        color: colorBuffer,
     }
+}
+
+function createTexture(gl: WebGLRenderingContext)
+{
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 255, 255]));
+    const image = new Image();
+    image.src = "img/f-texture.png";
+    image.addEventListener("load", function() 
+    {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        gl.generateMipmap(gl.TEXTURE_2D);
+    });
 }
 
 function drawCube(
@@ -318,6 +349,8 @@ async function main()
     gl.useProgram(programInfo.program);
 
     const buffers = setupBuffers(gl, programInfo);
+
+    createTexture(gl);
 
     drawLoop(gl, programInfo, buffers);
 }
