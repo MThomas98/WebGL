@@ -96,6 +96,7 @@ const COLORS =
     1.0, 0, 1.0, 
 ]
 
+const UP: vec3 = [0.0, 1.0, 0.0];
 
 interface ICubeProgramInformation
 {
@@ -115,27 +116,39 @@ interface ICubeProgramInformation
 
 class Camera
 {
-    constructor(position: vec3, rotation: vec3)
+    constructor(position: vec3, target: vec3)
     {
         this.position = position;
-        this.rotation = rotation;
+        this.target = target;
     }
 
     public getViewMatrix() : mat4 
     {
-        var view = mat4.create();
-        mat4.translate(view, view, this.position);
-        mat4.invert(view, view);
+        // This is how it's calculated
+        // const z = vec3.create();
+        // vec3.sub(z, this.position, this.target);
+        // vec3.normalize(z, z);
 
-        mat4.rotateX(view, view, this.rotation[0]);
-        mat4.rotateY(view, view, this.rotation[1]);
-        mat4.rotateZ(view, view, this.rotation[2]);
+        // const x = vec3.create();
+        // vec3.cross(x, z, UP);
+        // vec3.normalize(x, x);
 
+        // const y = vec3.create();
+        // vec3.cross(y, z, x);
+        // vec3.normalize(y, y);
+
+        // return [x[0], x[1], x[2], 0,
+        //         y[0], y[1], y[2], 0,
+        //         z[0], z[1], z[2], 0,
+        //         this.position[0], this.position[1], this.position[2], 1]
+
+        const view = mat4.create();
+        mat4.lookAt(view, this.position, this.target, UP);
         return view;
     }
     
     position: vec3 = vec3.create();
-    rotation: vec3 = vec3.create();
+    target: vec3 = vec3.create();
 }
 
 interface IBuffers
@@ -247,6 +260,8 @@ function drawLoop(gl: WebGLRenderingContext, programInfo: ICubeProgramInformatio
 
     const fpsElement = document.querySelector("#fps-counter");
 
+    const cubePosition: vec3 = [0, 0, -1000];
+
     var lastTime = Date.now();
     function draw()
     {
@@ -260,10 +275,10 @@ function drawLoop(gl: WebGLRenderingContext, programInfo: ICubeProgramInformatio
         
         drawCube(
             gl, programInfo, buffers,
-            [0, 0, -1000], 
+            cubePosition, 
             [0, rotationY, Math.PI / 4],
             [200, 200, 200],
-            new Camera([-100, 0, 0], [0, Math.PI / 10, 0]));
+            new Camera([-100, 0, 0], cubePosition));
 
         rotationY += rotationSpeed * deltaTime;
 
