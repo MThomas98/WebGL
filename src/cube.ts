@@ -2,7 +2,7 @@ const WIDTH: number = 640;
 const HEIGHT: number = 480;
 
 const VERTEX_SHADER_PATH = "shaders/cube/vertex.vs";
-const FRAGMENT_SHADER_PATH = "shaders/cube/fragment.vs";
+const FRAGMENT_SHADER_PATH = "shaders/cube/fragment.fs";
 
 import { mat4, vec3 } from "gl-matrix";
 
