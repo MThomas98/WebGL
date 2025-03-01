@@ -6,99 +6,7 @@ const FRAGMENT_SHADER_PATH = "shaders/cube/fragment.vs";
 
 import { mat4, vec3 } from "gl-matrix";
 
-import { createContext, ShaderProgram, VertexBuffer, Camera } from "./webgl";
-
-const VERTICIES = 
-[
-    -0.5, -0.5, -0.5,  0.0, 0.0,
-     0.5, -0.5, -0.5,  1.0, 0.0,
-     0.5,  0.5, -0.5,  1.0, 1.0,
-     0.5,  0.5, -0.5,  1.0, 1.0,
-    -0.5,  0.5, -0.5,  0.0, 1.0,
-    -0.5, -0.5, -0.5,  0.0, 0.0,
-
-    -0.5, -0.5,  0.5,  0.0, 0.0,
-     0.5, -0.5,  0.5,  1.0, 0.0,
-     0.5,  0.5,  0.5,  1.0, 1.0,
-     0.5,  0.5,  0.5,  1.0, 1.0,
-    -0.5,  0.5,  0.5,  0.0, 1.0,
-    -0.5, -0.5,  0.5,  0.0, 0.0,
-
-    -0.5,  0.5,  0.5,  1.0, 0.0,
-    -0.5,  0.5, -0.5,  1.0, 1.0,
-    -0.5, -0.5, -0.5,  0.0, 1.0,
-    -0.5, -0.5, -0.5,  0.0, 1.0,
-    -0.5, -0.5,  0.5,  0.0, 0.0,
-    -0.5,  0.5,  0.5,  1.0, 0.0,
-
-     0.5,  0.5,  0.5,  1.0, 0.0,
-     0.5,  0.5, -0.5,  1.0, 1.0,
-     0.5, -0.5, -0.5,  0.0, 1.0,
-     0.5, -0.5, -0.5,  0.0, 1.0,
-     0.5, -0.5,  0.5,  0.0, 0.0,
-     0.5,  0.5,  0.5,  1.0, 0.0,
-
-    -0.5, -0.5, -0.5,  0.0, 1.0,
-     0.5, -0.5, -0.5,  1.0, 1.0,
-     0.5, -0.5,  0.5,  1.0, 0.0,
-     0.5, -0.5,  0.5,  1.0, 0.0,
-    -0.5, -0.5,  0.5,  0.0, 0.0,
-    -0.5, -0.5, -0.5,  0.0, 1.0,
-
-    -0.5,  0.5, -0.5,  0.0, 1.0,
-     0.5,  0.5, -0.5,  1.0, 1.0,
-     0.5,  0.5,  0.5,  1.0, 0.0,
-     0.5,  0.5,  0.5,  1.0, 0.0,
-    -0.5,  0.5,  0.5,  0.0, 0.0,
-    -0.5,  0.5, -0.5,  0.0, 1.0
-];
-
-const COLORS = 
-[
-    1.0, 0, 0,
-    1.0, 0, 0,
-    1.0, 0, 0,
-    1.0, 0, 0,
-    1.0, 0, 0,
-    1.0, 0, 0,
-
-    0, 1.0, 0,
-    0, 1.0, 0,
-    0, 1.0, 0,
-    0, 1.0, 0,
-    0, 1.0, 0,
-    0, 1.0, 0,
-
-    0, 0, 1.0,
-    0, 0, 1.0,
-    0, 0, 1.0,
-    0, 0, 1.0,
-    0, 0, 1.0,
-    0, 0, 1.0,
-
-    0.0, 1.0, 1.0,
-    0.0, 1.0, 1.0,
-    0.0, 1.0, 1.0,
-    0.0, 1.0, 1.0,
-    0.0, 1.0, 1.0,
-    0.0, 1.0, 1.0,
-
-    1, 1, 1,
-    1, 1, 1,
-    1, 1, 1,
-    1, 1, 1,
-    1, 1, 1,
-    1, 1, 1,
-
-    1.0, 0, 1.0, 
-    1.0, 0, 1.0, 
-    1.0, 0, 1.0, 
-    1.0, 0, 1.0, 
-    1.0, 0, 1.0, 
-    1.0, 0, 1.0, 
-]
-
-const FLOAT32_BYTES = 4;
+import { createContext, ShaderProgram, VertexBuffer, Camera, FLOAT32_BYTES, CUBE_VERTICIES } from "./webgl";
 
 function setupGLOptions(gl: WebGLRenderingContext)
 {
@@ -167,10 +75,10 @@ function drawCube(
 
     shaderProgram.setUniformMatrix4fv("uView", false, camera.getViewMatrix());
 
-    buffer.bufferData(new Float32Array(VERTICIES), gl.STATIC_DRAW);
+    buffer.bufferData(new Float32Array(CUBE_VERTICIES), gl.STATIC_DRAW);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.drawArrays(gl.TRIANGLES, 0, VERTICIES.length / 3);
+    gl.drawArrays(gl.TRIANGLES, 0, CUBE_VERTICIES.length / 3);
 }
 
 function drawLoop(gl: WebGLRenderingContext, shaderProgram: ShaderProgram, buffer: VertexBuffer)
