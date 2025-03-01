@@ -6,7 +6,8 @@ const FRAGMENT_SHADER_PATH = "shaders/cube/fragment.fs";
 
 import { mat4, vec3 } from "gl-matrix";
 
-import { createContext, ShaderProgram, VertexBuffer, Camera, FLOAT32_BYTES, CUBE_VERTICIES } from "./webgl";
+import { createContext, ShaderProgram, VertexBuffer, Camera} from "./webgl";
+import { CUBE } from "./shapes";
 
 function setupGLOptions(gl: WebGLRenderingContext)
 {
@@ -25,8 +26,8 @@ function setupVertexBuffer(gl: WebGLRenderingContext, shaderProgram: ShaderProgr
     const vertexSize = 3;
     const vertexType = gl.FLOAT;
     const vertexNormalise = false;
-    const vertexStride = 5 * FLOAT32_BYTES;
-    const vertexOffset = 0;
+    const vertexStride = CUBE.stride;
+    const vertexOffset = CUBE.vertexOffset;
     vertexBuffer.addAttribute(vertexLocation, vertexSize, vertexType, vertexNormalise, vertexStride, vertexOffset);
 
     // Texture Coords
@@ -34,9 +35,18 @@ function setupVertexBuffer(gl: WebGLRenderingContext, shaderProgram: ShaderProgr
     const texCoordSize = 2;
     const texCoordType = gl.FLOAT;
     const texCoordNormalise = false;
-    const texCoordStride = 5 * FLOAT32_BYTES;
-    const texCoordOffset = 3 * FLOAT32_BYTES;
+    const texCoordStride = CUBE.stride;
+    const texCoordOffset = CUBE.texCoordsOffset;
     vertexBuffer.addAttribute(texCoordLocation, texCoordSize, texCoordType, texCoordNormalise, texCoordStride, texCoordOffset);
+    
+    // Texture Coords
+    const normalLocation = shaderProgram.getAttributeLocation("aNormal");
+    const normalSize = 3;
+    const normalType = gl.FLOAT;
+    const normalNormalise = false;
+    const normalStride = CUBE.stride;
+    const normalOffset = CUBE.normalsOffset;
+    vertexBuffer.addAttribute(normalLocation, normalSize, normalType, normalNormalise, normalStride, normalOffset);
 
     return vertexBuffer;
 }
@@ -79,10 +89,10 @@ function drawCube(
 
     shaderProgram.setUniformMatrix4fv("uView", false, camera.getViewMatrix());
 
-    buffer.bufferData(new Float32Array(CUBE_VERTICIES), gl.STATIC_DRAW);
+    buffer.bufferData(new Float32Array(CUBE.verticies), gl.STATIC_DRAW);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.drawArrays(gl.TRIANGLES, 0, CUBE_VERTICIES.length / 3);
+    gl.drawArrays(gl.TRIANGLES, 0, CUBE.verticies.length / 3);
 }
 
 function drawLoop(gl: WebGLRenderingContext, shaderProgram: ShaderProgram, buffer: VertexBuffer)
@@ -143,6 +153,7 @@ async function main()
 
     shaderProgram.registerAttribute("aVertexPosition");
     shaderProgram.registerAttribute("aTexCoord");
+    shaderProgram.registerAttribute("aNormal");
 
     shaderProgram.registerUniform("uProjection");
     shaderProgram.registerUniform("uView");
