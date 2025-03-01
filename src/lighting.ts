@@ -4,7 +4,7 @@ const HEIGHT: number = 480;
 const VERTEX_SHADER_PATH = "shaders/lighting/vertex.vs";
 const FRAGMENT_SHADER_PATH = "shaders/lighting/fragment.fs";
 
-import { mat4, vec3 } from "gl-matrix";
+import { mat3, mat4, vec3 } from "gl-matrix";
 
 import { createContext, ShaderProgram, VertexBuffer, Camera} from "./webgl";
 import { CUBE } from "./shapes";
@@ -12,7 +12,7 @@ import { CUBE } from "./shapes";
 function setupGLOptions(gl: WebGLRenderingContext)
 {
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-    gl.clearColor(0, 0, 0, 1);
+    gl.clearColor(0.1, 0.1, 0.1, 1);
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
 }
@@ -70,7 +70,7 @@ function setupTexture(gl: WebGLRenderingContext)
 
 function calculateLighting(shaderProgram: ShaderProgram)
 {
-    const dirLightDirection: vec3 = [-1, 1, -1];
+    const dirLightDirection: vec3 = [-1, -1, -1];
     vec3.normalize(dirLightDirection, dirLightDirection);
     shaderProgram.setUniform3fv("uDirLightDirection", dirLightDirection);
 }
@@ -94,13 +94,19 @@ function drawCube(
 {
     shaderProgram.use();
 
-    const translationMatrix = mat4.create();
-    mat4.translate(translationMatrix, translationMatrix, position);
-    mat4.scale(translationMatrix, translationMatrix, scale);
-    mat4.rotateX(translationMatrix, translationMatrix, rotation[0]);
-    mat4.rotateY(translationMatrix, translationMatrix, rotation[1]);
-    mat4.rotateZ(translationMatrix, translationMatrix, rotation[2]);
-    shaderProgram.setUniformMatrix4fv("uModel", false, translationMatrix);
+    const modelMatrix = mat4.create();
+    mat4.translate(modelMatrix, modelMatrix, position);
+    mat4.scale(modelMatrix, modelMatrix, scale);
+    mat4.rotateX(modelMatrix, modelMatrix, rotation[0]);
+    mat4.rotateY(modelMatrix, modelMatrix, rotation[1]);
+    mat4.rotateZ(modelMatrix, modelMatrix, rotation[2]);
+    shaderProgram.setUniformMatrix4fv("uModel", false, modelMatrix);
+
+    const normalMatrix = mat3.create();
+    mat3.fromMat4(normalMatrix, modelMatrix);
+    mat3.invert(normalMatrix, normalMatrix);
+    mat3.transpose(normalMatrix, normalMatrix);
+    shaderProgram.setUniformMatrix3fv("uNormalMatrix", false, normalMatrix);
 
     shaderProgram.setUniformMatrix4fv("uView", false, camera.getViewMatrix());
 
@@ -117,7 +123,7 @@ function drawLoop(gl: WebGLRenderingContext, shaderProgram: ShaderProgram, buffe
     var cubeRotationY = 0;
 
     const cameraRadius = 1000;
-    const cameraRotationSpeed = Math.PI / 2;
+    const cameraRotationSpeed = Math.PI / 2; // deg/s
     var cameraAngle = 0;
 
     const camera = new Camera([0, 0, 0], cubePosition);
@@ -131,14 +137,14 @@ function drawLoop(gl: WebGLRenderingContext, shaderProgram: ShaderProgram, buffe
         drawCube(
             gl, shaderProgram, buffer,
             cubePosition, 
-            [0, 0, 0],
+            [0, cubeRotationY, 0],
             [200, 200, 200],
             camera);
 
         cubeRotationY += cubeRotationSpeed * deltaTime;
         
-        cameraAngle += cameraRotationSpeed * deltaTime;
-        camera.orbitTarget(cameraRadius, cameraAngle);
+        // cameraAngle += cameraRotationSpeed * deltaTime;
+        // camera.orbitTarget(cameraRadius, cameraAngle);
 
         requestAnimationFrame(draw);
     }
@@ -169,6 +175,7 @@ async function main()
     shaderProgram.registerUniform("uProjection");
     shaderProgram.registerUniform("uView");
     shaderProgram.registerUniform("uModel");
+    shaderProgram.registerUniform("uNormalMatrix")
 
     shaderProgram.registerUniform("uDirLightDirection");
 

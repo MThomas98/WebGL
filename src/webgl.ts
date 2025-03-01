@@ -1,4 +1,4 @@
-import { vec4, mat4, vec3 } from "gl-matrix";
+import { vec4, mat4, vec3, mat3 } from "gl-matrix";
 
 import { readFile } from "./utils";
 
@@ -183,6 +183,18 @@ export class ShaderProgram
         this.gl.uniform4fv(uniformLocation, value)
     }
 
+    public setUniformMatrix3fv(name: string, transpose: boolean, value: mat3)
+    {
+        const uniformLocation = this.uniformLocations.get(name);
+        if (uniformLocation === undefined)
+        {
+            console.log(`Tried setting unregistered uniform ${name}`);
+            return;
+        }
+
+        this.gl.uniformMatrix3fv(uniformLocation, transpose, value);
+    }
+
     public setUniformMatrix4fv(name: string, transpose: boolean, value: mat4)
     {
         const uniformLocation = this.uniformLocations.get(name);
@@ -248,8 +260,6 @@ export class Camera
             this.target[1],
             this.target[2] - (radius * Math.cos(angle))
         ];
-
-        console.log(this.position);
     }
 
     public getViewMatrix() : mat4 
