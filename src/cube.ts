@@ -41,10 +41,12 @@ function setupVertexBuffer(gl: WebGLRenderingContext, shaderProgram: ShaderProgr
     return vertexBuffer;
 }
 
-function createTexture(gl: WebGLRenderingContext)
+function setupTexture(gl: WebGLRenderingContext)
 {
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
+
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
 
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 255, 255]));
     const image = new Image();
@@ -65,6 +67,8 @@ function drawCube(
     scale: vec3,
     camera: Camera)
 {
+    shaderProgram.use();
+
     const translationMatrix = mat4.create();
     mat4.translate(translationMatrix, translationMatrix, position);
     mat4.scale(translationMatrix, translationMatrix, scale);
@@ -86,7 +90,7 @@ function drawLoop(gl: WebGLRenderingContext, shaderProgram: ShaderProgram, buffe
     const projectionMatrix = mat4.create();
     // mat4.ortho(projectionMatrix, 0, gl.canvas.width, gl.canvas.height, 0, 0.1, 10000);
     mat4.perspective(projectionMatrix, 45 * (Math.PI / 180), gl.canvas.width / gl.canvas.height, 0.1, 100000);
-    shaderProgram.setUniformMatrix4fv("uView", false, projectionMatrix);
+    shaderProgram.setUniformMatrix4fv("uProjection", false, projectionMatrix);
 
     const rotationSpeed = Math.PI / 2; // deg/s
     var rotationY = 0;
@@ -109,7 +113,7 @@ function drawLoop(gl: WebGLRenderingContext, shaderProgram: ShaderProgram, buffe
         drawCube(
             gl, shaderProgram, buffer,
             cubePosition, 
-            [0, rotationY, Math.PI / 4],
+            [-Math.PI / 4, rotationY, 0],
             [200, 200, 200],
             new Camera([-100, 0, 0], cubePosition));
 
@@ -138,7 +142,6 @@ async function main()
     } 
 
     shaderProgram.registerAttribute("aVertexPosition");
-    shaderProgram.registerAttribute("aColor");
     shaderProgram.registerAttribute("aTexCoord");
 
     shaderProgram.registerUniform("uProjection");
@@ -149,7 +152,7 @@ async function main()
 
     const buffer = setupVertexBuffer(gl, shaderProgram);
 
-    createTexture(gl);
+    setupTexture(gl);
 
     drawLoop(gl, shaderProgram, buffer);
 }

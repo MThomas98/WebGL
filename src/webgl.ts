@@ -6,13 +6,7 @@ export const UP: vec3 = [0.0, 1.0, 0.0];
 export const FLOAT32_BYTES = 4;
 export const CUBE_VERTICIES = 
 [
-    -0.5, -0.5, -0.5,  0.0, 0.0,
-     0.5, -0.5, -0.5,  1.0, 0.0,
-     0.5,  0.5, -0.5,  1.0, 1.0,
-     0.5,  0.5, -0.5,  1.0, 1.0,
-    -0.5,  0.5, -0.5,  0.0, 1.0,
-    -0.5, -0.5, -0.5,  0.0, 0.0,
-
+    // Front
     -0.5, -0.5,  0.5,  0.0, 0.0,
      0.5, -0.5,  0.5,  1.0, 0.0,
      0.5,  0.5,  0.5,  1.0, 1.0,
@@ -20,6 +14,15 @@ export const CUBE_VERTICIES =
     -0.5,  0.5,  0.5,  0.0, 1.0,
     -0.5, -0.5,  0.5,  0.0, 0.0,
 
+    // Back
+    -0.5, -0.5, -0.5,  0.0, 0.0,
+    -0.5,  0.5, -0.5,  0.0, 1.0,
+     0.5,  0.5, -0.5,  1.0, 1.0,
+     0.5,  0.5, -0.5,  1.0, 1.0,
+     0.5, -0.5, -0.5,  1.0, 0.0,
+    -0.5, -0.5, -0.5,  0.0, 0.0,
+
+    // Left
     -0.5,  0.5,  0.5,  1.0, 0.0,
     -0.5,  0.5, -0.5,  1.0, 1.0,
     -0.5, -0.5, -0.5,  0.0, 1.0,
@@ -27,26 +30,29 @@ export const CUBE_VERTICIES =
     -0.5, -0.5,  0.5,  0.0, 0.0,
     -0.5,  0.5,  0.5,  1.0, 0.0,
 
-     0.5,  0.5,  0.5,  1.0, 0.0,
-     0.5,  0.5, -0.5,  1.0, 1.0,
-     0.5, -0.5, -0.5,  0.0, 1.0,
-     0.5, -0.5, -0.5,  0.0, 1.0,
-     0.5, -0.5,  0.5,  0.0, 0.0,
-     0.5,  0.5,  0.5,  1.0, 0.0,
+    // Right
+     0.5,  0.5,  0.5,  0.0, 1.0,
+     0.5, -0.5,  0.5,  1.0, 1.0,
+     0.5, -0.5, -0.5,  1.0, 0.0,
+     0.5, -0.5, -0.5,  1.0, 0.0,
+     0.5,  0.5, -0.5,  0.0, 0.0,
+     0.5,  0.5,  0.5,  0.0, 1.0,
 
+    // Bottom
     -0.5, -0.5, -0.5,  0.0, 1.0,
      0.5, -0.5, -0.5,  1.0, 1.0,
      0.5, -0.5,  0.5,  1.0, 0.0,
      0.5, -0.5,  0.5,  1.0, 0.0,
     -0.5, -0.5,  0.5,  0.0, 0.0,
     -0.5, -0.5, -0.5,  0.0, 1.0,
-
-    -0.5,  0.5, -0.5,  0.0, 1.0,
-     0.5,  0.5, -0.5,  1.0, 1.0,
-     0.5,  0.5,  0.5,  1.0, 0.0,
-     0.5,  0.5,  0.5,  1.0, 0.0,
-    -0.5,  0.5,  0.5,  0.0, 0.0,
-    -0.5,  0.5, -0.5,  0.0, 1.0
+    
+    // Top
+    -0.5,  0.5, -0.5,  0.0, 0.0,
+    -0.5,  0.5,  0.5,  0.0, 1.0,
+     0.5,  0.5,  0.5,  1.0, 1.0,
+     0.5,  0.5,  0.5,  1.0, 1.0,
+     0.5,  0.5, -0.5,  1.0, 0.0,
+    -0.5,  0.5, -0.5,  0.0, 0.0,
 ];
 
 export function createContext(canvasId: string, width: number, height: number) : WebGLRenderingContext | null
@@ -134,7 +140,9 @@ export class ShaderProgram
         try
         {
             vertexSrc = await readFile(vertexPath);
+            console.log(`Vertex Buffer:\n${vertexSrc}`);
             fragmentSrc = await readFile(fragmentPath);
+            console.log(`Fragment Buffer:\n${fragmentSrc}`);
         }
         catch (err)
         {
@@ -166,7 +174,7 @@ export class ShaderProgram
         const attribLocation = this.gl.getAttribLocation(this.program, attribName);
         if (attribLocation === -1)
         {
-            alert(`Failed to get attribute ${attribName}`);
+            console.log(`Failed to get attribute ${attribName}`);
             return;
         }
 
@@ -178,7 +186,7 @@ export class ShaderProgram
         const attribLocation = this.attribLocations.get(attribName);
         if (attribLocation === undefined)
         {
-            alert(`Tried to get unregistered attribute ${attribName}`);
+            console.log(`Tried to get unregistered attribute ${attribName}`);
             return -1;
         }
 
@@ -195,7 +203,7 @@ export class ShaderProgram
         const uniformLocation = this.gl.getUniformLocation(this.program, uniformName);
         if (uniformLocation === null)
         {
-            alert(`Failed to get uniform ${uniformName}`);
+            console.log(`Failed to get uniform ${uniformName}`);
             return;
         }
 
@@ -207,7 +215,7 @@ export class ShaderProgram
         const uniformLocation = this.uniformLocations.get(name);
         if (uniformLocation === undefined)
         {
-            alert(`Tried setting unregistered uniform ${name}`);
+            console.log(`Tried setting unregistered uniform ${name}`);
             return;
         }
 
@@ -219,7 +227,7 @@ export class ShaderProgram
         const uniformLocation = this.uniformLocations.get(name);
         if (uniformLocation === undefined)
         {
-            alert(`Tried setting unregistered uniform ${name}`);
+            console.log(`Tried setting unregistered uniform ${name}`);
             return;
         }
 
