@@ -159,6 +159,18 @@ export class ShaderProgram
         this.uniformLocations.set(uniformName, uniformLocation);
     }
 
+    public setUniform3fv(name: string, value: vec3)
+    {
+        const uniformLocation = this.uniformLocations.get(name);
+        if (uniformLocation === undefined)
+        {
+            console.log(`Tried setting unregistered uniform ${name}`);
+            return;
+        }
+
+        this.gl.uniform3fv(uniformLocation, value)
+    }
+
     public setUniform4fv(name: string, value: vec4)
     {
         const uniformLocation = this.uniformLocations.get(name);
@@ -227,6 +239,17 @@ export class Camera
     {
         this.position = position;
         this.target = target;
+    }
+
+    public orbitTarget(radius: number, angle: number)
+    {
+        this.position = [
+            this.target[0] - (radius * Math.sin(angle)),
+            this.target[1],
+            this.target[2] - (radius * Math.cos(angle))
+        ];
+
+        console.log(this.position);
     }
 
     public getViewMatrix() : mat4 

@@ -6,22 +6,22 @@ const fancy_log = require("fancy-log")
 
 const base = ["src/webgl.ts", "src/utils.ts"];
 
-// function buildLighting()
-// {
-//     const entries = base;
-//     entries.push("src/lighting.ts");
+function buildLighting()
+{
+    const entries = base;
+    entries.push("src/lighting.ts");
 
-//     return browerify({
-//         basedir: ".",
-//         debug: true,
-//         entries: entries,
-//     })
-//     .plugin(tsify)
-//     .bundle()
-//     .on("error", fancy_log)
-//     .pipe(source("bundle.js"))
-//     .pipe(gulp.dest("js"));
-// }
+    return browerify({
+        basedir: ".",
+        debug: true,
+        entries: entries,
+    })
+    .plugin(tsify)
+    .bundle()
+    .on("error", fancy_log)
+    .pipe(source("bundle.js"))
+    .pipe(gulp.dest("js"));
+}
 
 function buildCube()
 {
@@ -57,8 +57,8 @@ function buildRectangles()
     .pipe(gulp.dest("js"));
 }
 
-gulp.task("default", buildCube);
+gulp.task("default", buildLighting);
 
 gulp.task("rectangles", buildRectangles);
 gulp.task("cube", buildCube);
-// gulp.task("lighting", buildLighting);
+gulp.task("lighting", buildLighting);
