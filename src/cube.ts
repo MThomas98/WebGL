@@ -1,24 +1,27 @@
 const WIDTH: number = 640;
 const HEIGHT: number = 480;
 
+const VERTEX_SHADER_PATH = "shaders/cube/vertex.vs";
+const FRAGMENT_SHADER_PATH = "shaders/cube/fragment.vs";
+
 import { mat4, vec3, vec4 } from "gl-matrix";
 
 import { readFile } from "./utils";
-import { createProgram, createContext } from "./webgl";
+import { createProgram, createContext, createShader } from "./webgl";
 
 const VERTICIES = 
 [
     -0.5, -0.5, -0.5,  0.0, 0.0,
-    0.5, -0.5, -0.5,  1.0, 0.0,
-    0.5,  0.5, -0.5,  1.0, 1.0,
-    0.5,  0.5, -0.5,  1.0, 1.0,
+     0.5, -0.5, -0.5,  1.0, 0.0,
+     0.5,  0.5, -0.5,  1.0, 1.0,
+     0.5,  0.5, -0.5,  1.0, 1.0,
     -0.5,  0.5, -0.5,  0.0, 1.0,
     -0.5, -0.5, -0.5,  0.0, 0.0,
 
     -0.5, -0.5,  0.5,  0.0, 0.0,
-    0.5, -0.5,  0.5,  1.0, 0.0,
-    0.5,  0.5,  0.5,  1.0, 1.0,
-    0.5,  0.5,  0.5,  1.0, 1.0,
+     0.5, -0.5,  0.5,  1.0, 0.0,
+     0.5,  0.5,  0.5,  1.0, 1.0,
+     0.5,  0.5,  0.5,  1.0, 1.0,
     -0.5,  0.5,  0.5,  0.0, 1.0,
     -0.5, -0.5,  0.5,  0.0, 0.0,
 
@@ -29,24 +32,24 @@ const VERTICIES =
     -0.5, -0.5,  0.5,  0.0, 0.0,
     -0.5,  0.5,  0.5,  1.0, 0.0,
 
-    0.5,  0.5,  0.5,  1.0, 0.0,
-    0.5,  0.5, -0.5,  1.0, 1.0,
-    0.5, -0.5, -0.5,  0.0, 1.0,
-    0.5, -0.5, -0.5,  0.0, 1.0,
-    0.5, -0.5,  0.5,  0.0, 0.0,
-    0.5,  0.5,  0.5,  1.0, 0.0,
+     0.5,  0.5,  0.5,  1.0, 0.0,
+     0.5,  0.5, -0.5,  1.0, 1.0,
+     0.5, -0.5, -0.5,  0.0, 1.0,
+     0.5, -0.5, -0.5,  0.0, 1.0,
+     0.5, -0.5,  0.5,  0.0, 0.0,
+     0.5,  0.5,  0.5,  1.0, 0.0,
 
     -0.5, -0.5, -0.5,  0.0, 1.0,
-    0.5, -0.5, -0.5,  1.0, 1.0,
-    0.5, -0.5,  0.5,  1.0, 0.0,
-    0.5, -0.5,  0.5,  1.0, 0.0,
+     0.5, -0.5, -0.5,  1.0, 1.0,
+     0.5, -0.5,  0.5,  1.0, 0.0,
+     0.5, -0.5,  0.5,  1.0, 0.0,
     -0.5, -0.5,  0.5,  0.0, 0.0,
     -0.5, -0.5, -0.5,  0.0, 1.0,
 
     -0.5,  0.5, -0.5,  0.0, 1.0,
-    0.5,  0.5, -0.5,  1.0, 1.0,
-    0.5,  0.5,  0.5,  1.0, 0.0,
-    0.5,  0.5,  0.5,  1.0, 0.0,
+     0.5,  0.5, -0.5,  1.0, 1.0,
+     0.5,  0.5,  0.5,  1.0, 0.0,
+     0.5,  0.5,  0.5,  1.0, 0.0,
     -0.5,  0.5,  0.5,  0.0, 0.0,
     -0.5,  0.5, -0.5,  0.0, 1.0
 ];
@@ -137,47 +140,124 @@ class Camera
     target: vec3 = vec3.create();
 }
 
-interface ICubeProgramInformation
+
+class ShaderProgram
 {
-    program: WebGLProgram,
-    attributeLocation:
+    constructor(gl: WebGLRenderingContext)
     {
-        vertex: GLint,
-        color: GLint,
-        texCoord: GLint,
-    },
-    uniformLocation:
+        this.gl = gl;
+    }
+
+    public async initialise(vertexPath: string, fragmentPath: string) : Promise<boolean>
     {
-        projection: WebGLUniformLocation,
-        model: WebGLUniformLocation,
-        view: WebGLUniformLocation,
-    },
+        var vertexSrc: string;
+        var fragmentSrc: string;
+        try
+        {
+            vertexSrc = await readFile(vertexPath);
+            fragmentSrc = await readFile(fragmentPath);
+        }
+        catch (err)
+        {
+            return false;
+        }
+
+        const program = createProgram(this.gl, vertexSrc, fragmentSrc);
+        if (program === null)
+        {
+            return false;
+        }
+
+        this.program = program;
+        return true;
+    }
+
+    public use()
+    {
+        this.gl.useProgram(this.program);
+    }
+
+    public registerAttribute(attribName: string)
+    {
+        if (this.program === null)
+        {
+            return;
+        }
+        
+        const attribLocation = this.gl.getAttribLocation(this.program, attribName);
+        if (attribLocation === -1)
+        {
+            alert(`Failed to get attribute ${attribName}`);
+            return;
+        }
+
+        this.attribLocations.set(attribName, attribLocation);
+    }
+
+    public getAttributeLocation(attribName: string) : GLint
+    {
+        const attribLocation = this.attribLocations.get(attribName);
+        if (attribLocation === undefined)
+        {
+            alert(`Tried to get unregistered attribute ${attribName}`);
+            return -1;
+        }
+
+        return attribLocation;
+    }
+
+    public registerUniform(uniformName: string)
+    {
+        if (this.program === null)
+        {
+            return;
+        }
+
+        const uniformLocation = this.gl.getUniformLocation(this.program, uniformName);
+        if (uniformLocation === null)
+        {
+            alert(`Failed to get uniform ${uniformName}`);
+            return;
+        }
+
+        this.uniformLocations.set(uniformName, uniformLocation);
+    }
+
+    public setUniform4fv(name: string, value: vec4)
+    {
+        const uniformLocation = this.uniformLocations.get(name);
+        if (uniformLocation === undefined)
+        {
+            alert(`Tried setting unregistered uniform ${name}`);
+            return;
+        }
+
+        this.gl.uniform4fv(uniformLocation, value)
+    }
+
+    public setUniformMatrix4fv(name: string, transpose: boolean, value: mat4)
+    {
+        const uniformLocation = this.uniformLocations.get(name);
+        if (uniformLocation === undefined)
+        {
+            alert(`Tried setting unregistered uniform ${name}`);
+            return;
+        }
+
+        this.gl.uniformMatrix4fv(uniformLocation, transpose, value);
+    }
+
+    private gl : WebGLRenderingContext;
+    private program : WebGLProgram | null = null;
+
+    private attribLocations = new Map<string, GLint>;
+    private uniformLocations = new Map<string, WebGLUniformLocation>;
 }
 
-// TODO: Integrate in to program informat
+// TODO: Integrate in to ShaderProgram?
 interface IBuffers
 {
     vertex: WebGLBuffer,
-    color: WebGLBuffer,
-}
-
-function createProgramInformation(gl: WebGLRenderingContext, program: WebGLProgram) : ICubeProgramInformation
-{
-    return {
-        program: program,
-        attributeLocation:
-        {
-            vertex: gl.getAttribLocation(program, "aVertexPosition"),
-            color: gl.getAttribLocation(program, "aColor"),
-            texCoord: gl.getAttribLocation(program, "aTexCoord"),
-        },
-        uniformLocation:
-        {
-            projection: <WebGLUniformLocation> gl.getUniformLocation(program, "uProjection"),
-            model: <WebGLUniformLocation> gl.getUniformLocation(program, "uModel"),
-            view: <WebGLUniformLocation> gl.getUniformLocation(program, "uView"),
-        }
-    }
 }
 
 function setupGLDrawing(gl: WebGLRenderingContext)
@@ -185,53 +265,40 @@ function setupGLDrawing(gl: WebGLRenderingContext)
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     gl.clearColor(0, 0, 0, 1);
     gl.enable(gl.DEPTH_TEST);
-
-    // TODO: Normals
-    // VERTICIES isn't in the correct order so outward faces are considered inwards
-    // This is just a workaround for now
-    gl.disable(gl.CULL_FACE);
+    gl.enable(gl.CULL_FACE);
 }
 
-function setupBuffers(gl: WebGLRenderingContext, programInfo: ICubeProgramInformation) : IBuffers
+function setupBuffers(gl: WebGLRenderingContext, shaderProgram: ShaderProgram) : IBuffers
 {
+    shaderProgram.use();
+
     const vertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
 
-    // Vertex positions
-    gl.enableVertexAttribArray(programInfo.attributeLocation.vertex);
+    // Vertex Positions
+    const vertexLocation = shaderProgram.getAttributeLocation("aVertexPosition");
+    gl.enableVertexAttribArray(vertexLocation);
     const vertexSize = 3;
     const vertexType = gl.FLOAT;
     const vertexNormalise = false;
     const vertexStride = 5 * FLOAT32_BYTES;
     const vertexOffset = 0;
-    gl.vertexAttribPointer(programInfo.attributeLocation.vertex, vertexSize, vertexType, vertexNormalise, vertexStride, vertexOffset);
+    gl.vertexAttribPointer(vertexLocation, vertexSize, vertexType, vertexNormalise, vertexStride, vertexOffset);
 
     // Texture Coords
-    gl.enableVertexAttribArray(programInfo.attributeLocation.texCoord);
+    const texCoordLocation = shaderProgram.getAttributeLocation("aTexCoord");
+    gl.enableVertexAttribArray(texCoordLocation);
     const texCoordSize = 2;
     const texCoordType = gl.FLOAT;
     const texCoordNormalise = false;
     const texCoordStride = 5 * FLOAT32_BYTES;
     const texCoordOffset = 3 * FLOAT32_BYTES;
-    gl.vertexAttribPointer(programInfo.attributeLocation.texCoord, texCoordSize, texCoordType, texCoordNormalise, texCoordStride, texCoordOffset);
-
-    
-    const colorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-
-    gl.enableVertexAttribArray(programInfo.attributeLocation.color);
-    const colorSize = 3;
-    const colorType = gl.FLOAT;
-    const colorNormalise = false;
-    const colorStride = 0; // 0 implies: move forward size * sizeof(type) each iteration to get the next position
-    const colorOffset = 0;
-    gl.vertexAttribPointer(programInfo.attributeLocation.color, colorSize, colorType, colorNormalise, colorStride, colorOffset);
+    gl.vertexAttribPointer(texCoordLocation, texCoordSize, texCoordType, texCoordNormalise, texCoordStride, texCoordOffset);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     return {
         vertex: vertexBuffer,
-        color: colorBuffer,
     }
 }
 
@@ -252,7 +319,7 @@ function createTexture(gl: WebGLRenderingContext)
 
 function drawCube(
     gl: WebGLRenderingContext, 
-    programInfo: ICubeProgramInformation,
+    shaderProgram: ShaderProgram,
     buffers: IBuffers,
     position: vec3, 
     rotation: vec3,
@@ -265,26 +332,23 @@ function drawCube(
     mat4.rotateX(translationMatrix, translationMatrix, rotation[0]);
     mat4.rotateY(translationMatrix, translationMatrix, rotation[1]);
     mat4.rotateZ(translationMatrix, translationMatrix, rotation[2]);
-    gl.uniformMatrix4fv(programInfo.uniformLocation.model, false, translationMatrix);
+    shaderProgram.setUniformMatrix4fv("uModel", false, translationMatrix);
 
-    gl.uniformMatrix4fv(programInfo.uniformLocation.view, false, camera.getViewMatrix());
+    shaderProgram.setUniformMatrix4fv("uView", false, camera.getViewMatrix());
 
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.vertex);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(VERTICIES), gl.STATIC_DRAW);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(COLORS), gl.STATIC_DRAW);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, VERTICIES.length / 3);
 }
 
-function drawLoop(gl: WebGLRenderingContext, programInfo: ICubeProgramInformation, buffers: IBuffers)
+function drawLoop(gl: WebGLRenderingContext, shaderProgram: ShaderProgram, buffers: IBuffers)
 {
     const projectionMatrix = mat4.create();
     // mat4.ortho(projectionMatrix, 0, gl.canvas.width, gl.canvas.height, 0, 0.1, 10000);
     mat4.perspective(projectionMatrix, 45 * (Math.PI / 180), gl.canvas.width / gl.canvas.height, 0.1, 100000);
-    gl.uniformMatrix4fv(programInfo.uniformLocation.projection, false, projectionMatrix);
+    shaderProgram.setUniformMatrix4fv("uView", false, projectionMatrix);
 
     const rotationSpeed = Math.PI / 2; // deg/s
     var rotationY = 0;
@@ -305,7 +369,7 @@ function drawLoop(gl: WebGLRenderingContext, programInfo: ICubeProgramInformatio
         }
         
         drawCube(
-            gl, programInfo, buffers,
+            gl, shaderProgram, buffers,
             cubePosition, 
             [0, rotationY, Math.PI / 4],
             [200, 200, 200],
@@ -326,33 +390,30 @@ async function main()
     {
         return;
     }
+
     setupGLDrawing(gl);
 
-    const vertexShaderSrc = await readFile("shaders/cube/vertex.vs");
-    if (vertexShaderSrc === null)
+    const shaderProgram = new ShaderProgram(gl);
+    if (!await shaderProgram.initialise(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH))
     {
         return;
-    }
-    
-    const fragmentShaderSrc = await readFile("shaders/cube/fragment.fs");
-    if (fragmentShaderSrc === null)
-    {
-        return;
-    }
+    } 
 
-    const program = createProgram(gl, vertexShaderSrc, fragmentShaderSrc);
-    if (program === null)
-    {
-        return;
-    }
-    const programInfo = createProgramInformation(gl, program);
-    gl.useProgram(programInfo.program);
+    shaderProgram.registerAttribute("aVertexPosition");
+    shaderProgram.registerAttribute("aColor");
+    shaderProgram.registerAttribute("aTexCoord");
 
-    const buffers = setupBuffers(gl, programInfo);
+    shaderProgram.registerUniform("uProjection");
+    shaderProgram.registerUniform("uView");
+    shaderProgram.registerUniform("uModel");
+
+    shaderProgram.use();
+
+    const buffers = setupBuffers(gl, shaderProgram);
 
     createTexture(gl);
 
-    drawLoop(gl, programInfo, buffers);
+    drawLoop(gl, shaderProgram, buffers);
 }
 
 main();
