@@ -254,13 +254,38 @@ class ShaderProgram
     private uniformLocations = new Map<string, WebGLUniformLocation>;
 }
 
-// TODO: Integrate in to ShaderProgram?
-interface IBuffers
+// TODO: Has potentially redundant bind calls, maybe make a buffer manager?
+class VertexBuffer
 {
-    vertex: WebGLBuffer,
+    constructor(gl: WebGLRenderingContext)
+    {
+        this.gl = gl;
+        this.buffer = gl.createBuffer();
+    }
+
+    public bind()
+    {
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
+    }
+
+    public bufferData(data: AllowSharedBufferSource, usage: GLenum)
+    {
+        this.bind();
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, data, usage);
+    }
+
+    public addAttribute(attributeLocation: GLint, size: GLint, type: GLenum, normalize: GLboolean, stride: GLsizei, offset: GLintptr)
+    {
+        this.bind();  
+        this.gl.enableVertexAttribArray(attributeLocation);
+        this.gl.vertexAttribPointer(attributeLocation, size, type, normalize, stride, offset);
+    }
+
+    private gl: WebGLRenderingContext;
+    private buffer: WebGLBuffer;
 }
 
-function setupGLDrawing(gl: WebGLRenderingContext)
+function setupGLOptions(gl: WebGLRenderingContext)
 {
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     gl.clearColor(0, 0, 0, 1);
@@ -268,38 +293,29 @@ function setupGLDrawing(gl: WebGLRenderingContext)
     gl.enable(gl.CULL_FACE);
 }
 
-function setupBuffers(gl: WebGLRenderingContext, shaderProgram: ShaderProgram) : IBuffers
+function setupVertexBuffer(gl: WebGLRenderingContext, shaderProgram: ShaderProgram) : VertexBuffer
 {
-    shaderProgram.use();
-
-    const vertexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+    const vertexBuffer = new VertexBuffer(gl);
 
     // Vertex Positions
     const vertexLocation = shaderProgram.getAttributeLocation("aVertexPosition");
-    gl.enableVertexAttribArray(vertexLocation);
     const vertexSize = 3;
     const vertexType = gl.FLOAT;
     const vertexNormalise = false;
     const vertexStride = 5 * FLOAT32_BYTES;
     const vertexOffset = 0;
-    gl.vertexAttribPointer(vertexLocation, vertexSize, vertexType, vertexNormalise, vertexStride, vertexOffset);
+    vertexBuffer.addAttribute(vertexLocation, vertexSize, vertexType, vertexNormalise, vertexStride, vertexOffset);
 
     // Texture Coords
     const texCoordLocation = shaderProgram.getAttributeLocation("aTexCoord");
-    gl.enableVertexAttribArray(texCoordLocation);
     const texCoordSize = 2;
     const texCoordType = gl.FLOAT;
     const texCoordNormalise = false;
     const texCoordStride = 5 * FLOAT32_BYTES;
     const texCoordOffset = 3 * FLOAT32_BYTES;
-    gl.vertexAttribPointer(texCoordLocation, texCoordSize, texCoordType, texCoordNormalise, texCoordStride, texCoordOffset);
+    vertexBuffer.addAttribute(texCoordLocation, texCoordSize, texCoordType, texCoordNormalise, texCoordStride, texCoordOffset);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-    return {
-        vertex: vertexBuffer,
-    }
+    return vertexBuffer;
 }
 
 function createTexture(gl: WebGLRenderingContext)
@@ -320,7 +336,7 @@ function createTexture(gl: WebGLRenderingContext)
 function drawCube(
     gl: WebGLRenderingContext, 
     shaderProgram: ShaderProgram,
-    buffers: IBuffers,
+    buffer: VertexBuffer,
     position: vec3, 
     rotation: vec3,
     scale: vec3,
@@ -336,14 +352,13 @@ function drawCube(
 
     shaderProgram.setUniformMatrix4fv("uView", false, camera.getViewMatrix());
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.vertex);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(VERTICIES), gl.STATIC_DRAW);
+    buffer.bufferData(new Float32Array(VERTICIES), gl.STATIC_DRAW);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, VERTICIES.length / 3);
 }
 
-function drawLoop(gl: WebGLRenderingContext, shaderProgram: ShaderProgram, buffers: IBuffers)
+function drawLoop(gl: WebGLRenderingContext, shaderProgram: ShaderProgram, buffer: VertexBuffer)
 {
     const projectionMatrix = mat4.create();
     // mat4.ortho(projectionMatrix, 0, gl.canvas.width, gl.canvas.height, 0, 0.1, 10000);
@@ -369,7 +384,7 @@ function drawLoop(gl: WebGLRenderingContext, shaderProgram: ShaderProgram, buffe
         }
         
         drawCube(
-            gl, shaderProgram, buffers,
+            gl, shaderProgram, buffer,
             cubePosition, 
             [0, rotationY, Math.PI / 4],
             [200, 200, 200],
@@ -391,7 +406,7 @@ async function main()
         return;
     }
 
-    setupGLDrawing(gl);
+    setupGLOptions(gl);
 
     const shaderProgram = new ShaderProgram(gl);
     if (!await shaderProgram.initialise(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH))
@@ -409,11 +424,11 @@ async function main()
 
     shaderProgram.use();
 
-    const buffers = setupBuffers(gl, shaderProgram);
+    const buffer = setupVertexBuffer(gl, shaderProgram);
 
     createTexture(gl);
 
-    drawLoop(gl, shaderProgram, buffers);
+    drawLoop(gl, shaderProgram, buffer);
 }
 
 main();
