@@ -6,7 +6,7 @@ const FRAGMENT_SHADER_PATH = "shaders/cube/fragment.vs";
 
 import { mat4, vec3 } from "gl-matrix";
 
-import { createContext, ShaderProgram, VertexBuffer } from "./webgl";
+import { createContext, ShaderProgram, VertexBuffer, Camera } from "./webgl";
 
 const VERTICIES = 
 [
@@ -99,45 +99,6 @@ const COLORS =
 ]
 
 const FLOAT32_BYTES = 4;
-
-const UP: vec3 = [0.0, 1.0, 0.0];
-
-class Camera
-{
-    constructor(position: vec3, target: vec3)
-    {
-        this.position = position;
-        this.target = target;
-    }
-
-    public getViewMatrix() : mat4 
-    {
-        // This is how it's calculated
-        // const z = vec3.create();
-        // vec3.sub(z, this.position, this.target);
-        // vec3.normalize(z, z);
-
-        // const x = vec3.create();
-        // vec3.cross(x, z, UP);
-        // vec3.normalize(x, x);
-
-        // const y = vec3.create();
-        // vec3.cross(y, z, x);
-        // vec3.normalize(y, y);
-
-        // return [x[0], x[1], x[2], 0,
-        //         y[0], y[1], y[2], 0,
-        //         z[0], z[1], z[2], 0,
-        //         this.position[0], this.position[1], this.position[2], 1]
-
-        const view = mat4.create();
-        mat4.lookAt(view, this.position, this.target, UP);
-        return view;
-    }
-    
-    position: vec3 = vec3.create();
-    target: vec3 = vec3.create();
-}
 
 function setupGLOptions(gl: WebGLRenderingContext)
 {
