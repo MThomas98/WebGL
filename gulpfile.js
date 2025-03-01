@@ -1,65 +1,64 @@
 const gulp = require("gulp");
-const ts = require("gulp-typescript")
-const source = require("vinyl-source-stream");
 const browerify = require("browserify");
-const clean = require("gulp-clean")
+const source = require("vinyl-source-stream");
+const tsify = require("tsify");
+const fancy_log = require("fancy-log")
 
-function cleanOutput(cb)
+const base = ["src/webgl.ts", "src/utils.ts"];
+
+// function buildLighting()
+// {
+//     const entries = base;
+//     entries.push("src/lighting.ts");
+
+//     return browerify({
+//         basedir: ".",
+//         debug: true,
+//         entries: entries,
+//     })
+//     .plugin(tsify)
+//     .bundle()
+//     .on("error", fancy_log)
+//     .pipe(source("bundle.js"))
+//     .pipe(gulp.dest("js"));
+// }
+
+function buildCube()
 {
-    gulp.src("src/out")
-        .pipe(clean());
+    const entries = base;
+    entries.push("src/cube.ts");
 
-    gulp.src("js")
-        .pipe(clean());
-}
-
-function buildRectangles(cb)
-{
-    // cleanOutput();
-
-    const tsconfig = ts.createProject("tsconfig.json");
-    tsconfig.src()
-        .pipe(tsconfig())
-        .pipe(gulp.dest("src/out"));
-
-    browerify(
-    {
+    return browerify({
         basedir: ".",
         debug: true,
-        entries: ["src/out/rectangles.js"]
+        entries: entries,
     })
-        .bundle()
-        .pipe(source("bundle.js"))
-        .pipe(gulp.dest("js"));
-
-    cb();
+    .plugin(tsify)
+    .bundle()
+    .on("error", fancy_log)
+    .pipe(source("bundle.js"))
+    .pipe(gulp.dest("js"));
 }
 
-function buildCube(cb)
+function buildRectangles()
 {
-    // cleanOutput();
+    const entries = base;
+    entries.push("src/rectangles.ts");
 
-    const tsconfig = ts.createProject("tsconfig.json");
-    tsconfig.src()
-        .pipe(tsconfig())
-        .pipe(gulp.dest("src/out"));
-
-    browerify(
-    {
+    return browerify({
         basedir: ".",
         debug: true,
-        entries: ["src/out/cube.js"]
+        entries: entries,
     })
-        .bundle()
-        .pipe(source("bundle.js"))
-        .pipe(gulp.dest("js"));
-
-    cb();
+    .plugin(tsify)
+    .bundle()
+    .on("error", fancy_log)
+    .pipe(source("bundle.js"))
+    .pipe(gulp.dest("js"));
 }
 
-exports.default = buildCube;
+gulp.task("default", buildCube);
 
-exports.rectangles = buildRectangles;
-exports.cube = buildCube;
-
-// exports.clean = cleanOutput;
+gulp.task("rectangles", buildRectangles);
+gulp.task("cube", buildCube);
+// gulp.task("lighting", buildLighting);
