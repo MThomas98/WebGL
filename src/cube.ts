@@ -87,7 +87,7 @@ function drawCube(
     mat4.rotateZ(translationMatrix, translationMatrix, rotation[2]);
     shaderProgram.setUniformMatrix4fv("uModel", false, translationMatrix);
 
-    shaderProgram.setUniformMatrix4fv("uView", false, camera.getViewMatrix());
+    shaderProgram.setUniformMatrix4fv("uView", false, camera.getLookAtView());
 
     buffer.bufferData(new Float32Array(CUBE.verticies), gl.STATIC_DRAW);
 

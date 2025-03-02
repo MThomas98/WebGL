@@ -10,7 +10,7 @@ void main()
 {
     // OpenGL will interpolate the vector, so need to renormalise it
     vec3 normal = normalize(vNormal);
-    float dirLight = max(dot(normal, normalize(uDirLightDirection)), 0.0);
+    float dirLight = max(dot(normal, uDirLightDirection), 0.0);
 
     vec4 texture = texture2D(uTexture, vTexCoord);
     texture.rgb *= dirLight;

@@ -257,12 +257,12 @@ export class Camera
     {
         this.position = [
             this.target[0] - (radius * Math.sin(angle)),
-            this.target[1],
+            this.position[1],
             this.target[2] - (radius * Math.cos(angle))
         ];
     }
 
-    public getViewMatrix() : mat4 
+    public getLookAtView() : mat4 
     {
         // This is how it's calculated
         // const z = vec3.create();

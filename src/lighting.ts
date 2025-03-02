@@ -70,7 +70,7 @@ function setupTexture(gl: WebGLRenderingContext)
 
 function calculateLighting(shaderProgram: ShaderProgram)
 {
-    const dirLightDirection: vec3 = [-1, -1, -1];
+    const dirLightDirection: vec3 = [1, 1, 1];
     vec3.normalize(dirLightDirection, dirLightDirection);
     shaderProgram.setUniform3fv("uDirLightDirection", dirLightDirection);
 }
@@ -108,7 +108,7 @@ function drawCube(
     mat3.transpose(normalMatrix, normalMatrix);
     shaderProgram.setUniformMatrix3fv("uNormalMatrix", false, normalMatrix);
 
-    shaderProgram.setUniformMatrix4fv("uView", false, camera.getViewMatrix());
+    shaderProgram.setUniformMatrix4fv("uView", false, camera.getLookAtView());
 
     buffer.bufferData(new Float32Array(CUBE.verticies), gl.STATIC_DRAW);
 
@@ -137,7 +137,7 @@ function drawLoop(gl: WebGLRenderingContext, shaderProgram: ShaderProgram, buffe
         drawCube(
             gl, shaderProgram, buffer,
             cubePosition, 
-            [0, cubeRotationY, 0],
+            [0, cubeRotationY, -Math.PI / 4],
             [200, 200, 200],
             camera);
 
